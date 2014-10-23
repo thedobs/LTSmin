@@ -165,6 +165,8 @@ static trace_node * current;
 // Variables for loading a trace from model checker
 static lts_t trace;
 static int ** trace_states;
+static int trace_nTrans;
+static int * trace_trans = NULL;
 
 //Options
 static bool loopDetection = false;
@@ -651,10 +653,11 @@ replayTransitions(int transNumbers[], int amountOf, bool printOut){
 		i++;
 	}
 	if(!success){ 
-		fprintf(stderr, RED "\t ERROR: " RESET " Stopped replaying transitions. Transition at index %d is not available in this state.\n",i);
-	 	fprintf(stdout, "\t Enter 'trans' to see all available transitions and successor states.\n");
+		fprintf(stderr, RED "\t ERROR: " RESET "Stopped replaying transitions. Transition at index %d is not available in this state.\n",i);
+	 	fprintf(stdout,     "\t        Enter 'trans' to see all available transitions and successor states.\n");
 	} else if (printOut) {
-		fprintf(stdout, "\n Took %d transitions leading to following state:\n", amountOf);
+		fprintf(stdout, "\n");
+		fprintf(stdout, MAGENTA "Took %d transitions leading to following state:\n" RESET, amountOf);
 		printNode(current,1);
 	}
 }
@@ -678,12 +681,81 @@ replayTransitionsByStates(int ** states, int amountOf, bool printOut){
 		i++;
 	}
 	if(!success){ 
-		fprintf(stderr, RED "\t ERROR: " RESET " Stopped replaying transitions. Transition at index %d is not available in this state.\n",i);
-	 	fprintf(stderr, "\t Enter 'trans' to see all available transitions and successor states.\n");
+		fprintf(stderr, RED "\t ERROR: " RESET "Stopped replaying transitions. Transition at index %d is not available in this state.\n",i);
+	 	fprintf(stderr,     "\t        Enter 'trans' to see all available transitions and successor states.\n");
 	} else if (printOut) {
-		fprintf(stdout, "\n Took %d transitions leading to following state:\n", amountOf);
+		fprintf(stdout, "\n");
+		fprintf(stdout, MAGENTA "Took %d transitions leading to following state:\n" RESET, amountOf);
 		printNode(current,1);
 	}
+}
+
+/* * SECTION * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *
+ *	 Saving or loading to/from files
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+void
+removeExtension(char * file, char * minusExt, int index){
+	for(int i = 0; i < index; i++){
+		minusExt[i]=file[i];
+	}
+}
+
+int
+loadPINSsimFile(char * file, int * values){
+	FILE * read;
+	long lSize;
+	char * buffer;
+	size_t result;
+
+	read = fopen(file, "rb" );
+	if (read==NULL) {fprintf(stderr, RED "\t ERROR:"RESET" File error"); exit (1);}
+	
+	// obtain file size:
+	fseek(read , 0 , SEEK_END);
+	lSize = ftell (read);
+	rewind(read);
+
+	// allocate memory to contain the whole file:
+	buffer = (char*) malloc (sizeof(char)*lSize);
+	if (buffer == NULL) {fprintf(stderr, RED "\t ERROR:"RESET" Memory error"); exit (2);}
+	// copy the file into the buffer:
+	result = fread (buffer,1,lSize,read);
+	if ((long)result != lSize) {fprintf(stderr, RED "\t ERROR:" RESET "Reading error"); exit (3);}
+
+	// terminate
+	fclose(read);
+
+	int nSemi = 0;
+	for(int i = 0; buffer[i] != '\0'; ++i){
+		if (buffer[i] == ';') nSemi++;
+	}
+
+	// Tokenize buffer and store result in int * values
+	int n = 0;
+	if(nSemi > 0) values = (int*)realloc(values,nSemi*sizeof(int));
+	if(strstr(buffer,";")){
+		fprintf(stderr, "Contains ;!\n");
+		char * split = strtok(buffer,";");
+		sscanf(split,"%d",&values[n]);
+		fprintf(stderr, "%d %s\n", n, split);
+		while (split!=NULL){
+			split = strtok(NULL,";");
+			if(split!=NULL){
+				n++;
+				sscanf(split,"%d",&values[n]);
+			}
+		}
+	}
+	else{
+		sscanf(buffer,"%d",&values[n]);
+	}
+
+	free(buffer);
+
+	return (nSemi);
 }
 
 // /*trc_get_type_str() from lts-tracepp.c
@@ -724,17 +796,19 @@ saveTracePINSsim(char * file){
 	trace_node * temp = head;
 	bool foundEnd = false;
 	int numTransitions = 0;
-	fprintf(save, "%d;", current->treeDepth+1);
+	fprintf(save, "%d;", N);
+	fprintf(save, "%d;", eLbls);
+	fprintf(save, "%d;", sLbls);
+	fprintf(save, "%d;", current->treeDepth);
 	while (!foundEnd){
 		int i = 0;
 		while (i < temp->numSuccessors){
-			if(temp->successors[i].isPath){ 
+			if(temp->successors[i].isPath){
 				fprintf(save, "%d;", temp->successors[i].grpNum);
 				break;
 			}
 			i++;
 		}
-		fprintf(stderr, "%d %d \n", i, temp->numSuccessors);
 		if (i >= temp->numSuccessors) foundEnd = true;
 		else{ 
 			numTransitions++;
@@ -743,16 +817,92 @@ saveTracePINSsim(char * file){
 	}
 	if (current->treeDepth == numTransitions){ 
 		fprintf(stdout,CYAN "\t INFO: " RESET " Saved trace with %d transitions to file: %s \n\n",numTransitions+1,file);
+		fclose(save);
 		return true;
 	} else {
 		fprintf(stderr, RED "\t ERROR:" RESET " Expected %d, found %d transitions\n", current->treeDepth,numTransitions);
+		fclose(save);
 		return false;
 	}
-	fclose(save);
 }
 
-//bool
-//loadTracePINSsim(char * file){}
+void
+saveTrace(char * file){
+
+	char * extension = "";
+	extension = strrchr (file, '.');
+	if (extension == NULL) strcat(file,".pinssim");
+	else if (strcmp(extension,".pinssim") != 0 && strcmp(extension,".gcf") != 0){
+		int index = extension-file; 
+		char * temp = (char*)alloca((index-1)*sizeof(char));
+		removeExtension(file,temp,index);
+		file = temp;
+		strcat(file,".pinssim");
+		fprintf(stdout,CYAN "\t INFO: " RESET "Detected unsuitable file extension %s.\n", extension);
+		fprintf(stdout,     "\t       Replaced detected extension with .pinssim.\n\n");
+	}
+
+	extension = strrchr (file, '.');
+	if (strcmp(extension,".pinssim") == 0){
+		saveTracePINSsim(file);
+	} 
+	else if (strcmp(extension,".gcf") == 0){
+		fprintf(stdout,CYAN "\t INFO: " RESET " Saving to .gcf files not supported yet. Pls use .pinssim.\n\n");
+	}
+}
+
+
+bool
+loadTracePINSsim(char * file){
+	
+	int n;
+	int * values = (int*)malloc(sizeof(int));
+	char * extension = "";
+	extension = strrchr (file, '.');
+
+	if (extension == NULL){ 
+		fprintf(stderr, RED "\t ERROR:" RESET " No file extension. Please load a .gcf or .pinssim file.\n");
+		return false;
+	} 
+	else if (strcmp(extension,".pinssim") == 0){
+		n = loadPINSsimFile(file,values);
+		fprintf(stdout, "Number of values read from %s: %d\n", file, n);
+		fprintf(stdout,CYAN "\t INFO: " RESET " Loaded trace from file: %s \n\n",file);
+	} else{
+		fprintf(stderr, RED "\t ERROR:" RESET " File extension %s unknown. Please load a .pinssim file.\n", extension);
+		return false;
+	}
+
+	fprintf(stderr, "%d\n", values[0]);
+	for (int i = 0; i < n; ++i) fprintf(stderr, "%d %d,", i, values[i]);
+	fprintf(stdout, "\n");
+	
+	if (n >= 4){
+		if (values[0] != N ||
+		    values[1] != eLbls ||
+			values[2] != sLbls ||
+			values[3] != (n-4  )){
+			fprintf(stderr, RED "\t ERROR:" RESET " This trace does not match the loaded model.\n");
+			return false;
+		} else{
+			trace_nTrans = values[3];
+			fprintf(stderr, "%d\n",trace_nTrans);
+			trace_trans = (int*)malloc(trace_nTrans*sizeof(int));
+			for (int i = 0; i < trace_nTrans; ++i){
+				trace_trans[i] = values[4+i];
+				fprintf(stdout, "%d,", trace_trans[i]);
+			}
+			fprintf(stdout, "\n");
+			fprintf(stdout, "%d\n", trace_nTrans);
+			return true;
+		}
+	}
+	else{
+		return false;
+	}
+	
+
+}
 
 /*loadTraceGCF()
   load lts_t trace from file and extracts a int ** array of the states in the trace from it
@@ -761,8 +911,13 @@ bool
 loadTraceGCF(char * file){
 	opf = stdout;
 	fprintf(stdout, "\n");
-	char * extension = strrchr (file, '.');
-	if (strcmp(extension,".gcf") == 0){
+	char * extension = "";
+	extension = strrchr (file, '.');
+	if (extension == NULL){ 
+		fprintf(stderr, RED "\t ERROR:" RESET " No file extension. Please load a .gcf or .pinssim file.\n");
+		return false;
+	} 
+	else if (strcmp(extension,".gcf") == 0){
 		trace = lts_create();
 		lts_read(file,trace);
 		fprintf(stdout,CYAN "\t INFO: " RESET " Loaded trace from file: %s \n\n",file);
@@ -826,9 +981,28 @@ loadTraceGCF(char * file){
     }
 }
 
+void
+loadTrace(char * file){
+	char * extension = "";
+	extension = strrchr (file, '.');
+
+	if (extension == NULL){ 
+		fprintf(stderr, RED "\t ERROR:" RESET " No file extension. Please load a .gcf or .pinssim file.\n");
+	}
+	else if (strcmp(extension,".gcf") == 0){
+		if(loadTraceGCF(file)) replayTransitionsByStates(trace_states,(int)trace->transitions,1);
+		else fprintf(stderr, RED "\t ERROR:" RESET " Loading trace from file '%s' was not successful.\n", file);
+	}
+	else if (strcmp(extension,".pinssim") == 0){
+		if (loadTracePINSsim(file)) replayTransitions(trace_trans,trace_nTrans,true);
+	} else{
+		fprintf(stderr, RED "\t ERROR:" RESET " File extension %s unknown. Please load a .gcf or .pinssim file.\n", extension);
+	}
+}
+
 /* * SECTION * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  *
- *	 I/O functionalities
+ *	 Shell interface functionalities
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -919,8 +1093,7 @@ bool handleIO(char * input){
 		if (nCom >= 2){
 			if (strcmp(com[1],"trace") == 0){
 				if (nCom >= 3){
-					if (loadTraceGCF(com[2]))
-    					replayTransitionsByStates(trace_states,(int)trace->transitions,1);
+					loadTrace(com[2]);		
 				}
 			} else fprintf(stderr, RED "\t ERROR: " RESET " 'load trace' needs as 2. argument the path fo the file of the trace that should be loaded.\n");
 		} else fprintf(stderr, RED "\t ERROR: " RESET " 'load' needs as argument a specification what to load.\n");
@@ -929,10 +1102,10 @@ bool handleIO(char * input){
 		if (nCom >= 2){
 			if (strcmp(com[1],"trace") == 0){
 				if (nCom >= 3){
-					saveTracePINSsim(com[2]);
+					saveTrace(com[2]);
 				}
-			} else fprintf(stderr, RED "\t ERROR: " RESET " 'load trace' needs as 2. argument the path fo the file of the trace that should be loaded.\n");
-		} else fprintf(stderr, RED "\t ERROR: " RESET " 'load' needs as argument a specification what to load.\n");
+			} else fprintf(stderr, RED "\t ERROR: " RESET " 'save trace' needs as 2. argument the path fo the file of the trace that should be loaded.\n");
+		} else fprintf(stderr, RED "\t ERROR: " RESET " 'save' needs as argument a specification what to load.\n");
 	}
 	//////////////////////////////////////////
 	// CHANGE SETTING COMMAND
@@ -1087,20 +1260,20 @@ int main (int argc, char *argv[]){
     // Check for further run time arguments and load or open file
     if (argc > 2){
 		fprintf(stdout, "\n");
-		char * extension = strrchr (files[1], '.');
-		if (strcmp(extension,".gcf") == 0){
-    		if (loadTraceGCF(files[1]))
-    			replayTransitionsByStates(trace_states,(int)trace->transitions,1);
-    	}
-    	else if (strcmp(extension,".txt") == 0){
+		char * extension = "";
+		extension = strrchr (files[1], '.');
 
+		if (!(extension == NULL)){ 
+			if (strcmp(extension,".gcf") == 0){
+    			loadTraceGCF(files[1]);
+    		}
     	}
     }
 
     // Start IO procedure
 	runIO();
 
-	// Close output file if PINSIM still printing to it
+	// Close output file if PINSsim still printing to it
 	if(isWritingToFile) fclose(opf);
 
 	// Free allocated memory before exit 
