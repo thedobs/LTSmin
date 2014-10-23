@@ -23,16 +23,24 @@
 // Which of these are really necessary should be discussed later on
 
 // include "config.h"
+#include <hre/config.h>
 
+#ifdef __APPLE__
+#define _DARWIN_C_SOURCE
+#endif
+
+#include <alloca.h>
 #include <assert.h>
+#include <dirent.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
 
-#include <hre/config.h>
 #include <dm/dm.h>
 #include <hre/user.h>
 // From lts.h:
@@ -55,6 +63,13 @@
 #include <util-lib/dynamic-array.h>
 #include <util-lib/bitset.h>
 #include <hre/stringindex.h>
+
+#ifdef HAVE_SYLVAN
+#include <sylvan.h>
+#else
+#include <mc-lib/atomics.h>
+#define LACE_ME
+#endif
 
 // Colors for console output if available:
 #if defined(__unix__) || defined(__linux__) ||  defined(__APPLE__) || defined(__MACH__)

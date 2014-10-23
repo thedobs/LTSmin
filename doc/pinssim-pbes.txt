@@ -1,0 +1,24 @@
+//                           -*- mode: doc; outline-regexp==\(=*\) -*-
+pinssim-pbes(1)
+===============
+:Author:  Tobias Uebbing
+:Email:   <t.j.uebbing@student.utwente.nl>
+:Date:    2014-10-23
+
+== NAME
+
+pinssim-pbes - Simulator for manual state exploration to  e.g. analyze the process of a symbolic reachability analysis done by pbes2lts-sym.
+
+== SYNOPSIS
+
+*pinssim-pbes* <model> ['trace.gcf/trace.pinssim']
+
+== DESCRIPTION
+
+{manname}
+
+include::inc/pinssim.txt[]
+
+== OPTIONS
+
+Lorom ipsum

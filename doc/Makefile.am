@@ -75,6 +75,12 @@ MANPAGES += pbes2lts-mc.1
 
 MANPAGES += spgsolver.1
 
+MANPAGES += pinssim-lps.1
+MANPAGES += pinssim-mapa.1
+MANPAGES += pinssim-pbes.1
+MANPAGES += pinssim-dve.1
+MANPAGES += pinssim-prom.1
+
 doc_ASCIIDOC = $(addsuffix .txt, $(basename $(MANPAGES)))
 
 extra_ASCIIDOC  = inc/buchi.txt
