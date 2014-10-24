@@ -11,10 +11,9 @@ pinssim-dve - Simulator for manual state exploration to  e.g. analyze the proces
 
 == SYNOPSIS
 
-*pinssim-dve* <model> ['trace.gcf/trace.pinssim']
+*pinssim-dve* [OPTION]... <model> ['trace.gcf/trace.pinssim']
 
-== DESCRIPTION
+include::inc/pinssim-description.txt[]
 
-{manname}
-
-include::inc/pinssim.txt[]
+== SEE ALSO
+manpage:dve2lts-sym[1],

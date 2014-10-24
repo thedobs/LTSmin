@@ -1,0 +1,25 @@
+//                           -*- mode: doc; outline-regexp==\(=*\) -*-
+pinssim(1)
+===============
+:Author:  Tobias Uebbing
+:Email:   <t.j.uebbing@student.utwente.nl>
+:Date:    2014-10-23
+
+== NAME
+
+pinssim-dve - Simulator for manual state exploration to  e.g. analyze the process of a symbolic reachability analysis done by pins2lts-sym.
+
+== SYNOPSIS
+
+*pinssim* [OPTION]... <model> ['trace.gcf/trace.pinssim']
+
+include::inc/pinssim-description.txt[]
+
+== SEE ALSO
+manpage:pinssim-dve[1],
+manpage:pinssim-lps[1],
+manpage:pinssim-mapa[1],
+manpage:pinssim-pbes[1],
+manpage:pinssim-prom[1],
+manpage:pins2lts-sym[1],
+

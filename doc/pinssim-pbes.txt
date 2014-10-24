@@ -11,14 +11,9 @@ pinssim-pbes - Simulator for manual state exploration to  e.g. analyze the proce
 
 == SYNOPSIS
 
-*pinssim-pbes* <model> ['trace.gcf/trace.pinssim']
+*pinssim-pbes* [OPTION]... <model> ['trace.gcf/trace.pinssim']
 
-== DESCRIPTION
+include::inc/pinssim-description.txt[]
 
-{manname}
-
-include::inc/pinssim.txt[]
-
-== OPTIONS
-
-Lorom ipsum
+== SEE ALSO
+manpage:pbes2lts-sym[1],

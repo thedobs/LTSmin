@@ -11,16 +11,11 @@ pinssim - Simulator for manual state exploration to  e.g. analyze the process of
 
 == SYNOPSIS
 
-*pinssim-lps* <model> ['trace.gcf/trace.pinssim']
+*pinssim-lps* [OPTION]... <model> ['trace.gcf/trace.pinssim']
 
-== DESCRIPTION
+include::inc/pinssim-description.txt[]
 
-{manname}
-
-include::inc/pinssim.txt[]
-
-== OPTIONS
-
-Lorom ipsum
+== SEE ALSO
+manpage:lps2lts-sym[1],
 
 

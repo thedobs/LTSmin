@@ -22,7 +22,6 @@
 // TODO:
 // Which of these are really necessary should be discussed later on
 
-// include "config.h"
 #include <hre/config.h>
 
 #ifdef __APPLE__
@@ -190,6 +189,7 @@ static bool isPINsim_ext = false;
 static bool loopDetection = false;
 static bool clearMemOnGoBack = false;
 static bool clearMemOnRestart = true;
+static bool restartOnTraceLoad = true;
 static bool colorOutput = true;
 
 // I/O variables
@@ -197,8 +197,8 @@ FILE * opf;
 static bool isWritingToFile;
 static char * files[2]; 
 static char * com[20];
-static int numTextLines = 31;
-static char * helpText[31] =
+static int numTextLines = 32;
+static char * helpText[32] =
    {"COMMANDS:",
 	"  help                           show all options",
 	" PRINT OUT",
@@ -227,7 +227,8 @@ static char * helpText[31] =
 	"  set [OPTION] [VALUE]           Set OPTION to VALUE. OPTIONS:",
 	"      loopDetection              true/false - default: false",
 	"      clearMemOnGoBack           true/false - default: false",
-	"      clearMemOnGoRestart        true/false - default: true",
+	"      clearMemOnRestart          true/false - default: true",
+	"      restartOnTraceLoad         true/false - default: true",
 	" EXIT",
 	"  quit / q                       quit PINSsim"};
 
@@ -921,7 +922,7 @@ loadTracePINSsim(char * file){
 			fprintf(stdout, "\n");
 			fprintf(stdout, CYAN "\t INFO: " RESET "Loaded trace with %d transitions from %s\n", trace_nTrans, file);
 			// TODO: Remove reset of explored nodes to INITIAL maybe for future use
-			if (!isSameState(current->state,head->state)) restart(true);
+			if (restartOnTraceLoad && !isSameState(current->state,head->state)) restart(true);
 			free(values);
 			return true;
 		}
@@ -1005,7 +1006,7 @@ loadTraceGCF(char * file){
 		        // }
        	}
        	// TODO: Remove reset of explored nodes to INITIAL maybe for future use
-       	if (!isSameState(current->state,head->state)) restart(true);
+       	if (restartOnTraceLoad && !isSameState(current->state,head->state)) restart(true);
        	return true;
     }
 }
@@ -1191,6 +1192,16 @@ bool handleIO(char * input){
 					fprintf(stdout, CYAN "\t set" RESET " clearMemOnRestart = false\n");
 				}
 			}
+			else if (strcmp(com[1],"restartOnTraceLoad") == 0){ 
+				if(strcmp(com[2],"true") == 0 || strcmp(com[2],"1") == 0){
+					restartOnTraceLoad = 1;
+					fprintf(stdout, CYAN "\t set" RESET " restartOnTraceLoad = true\n");
+				}
+				if(strcmp(com[2],"false") == 0 || strcmp(com[2],"0") == 0){
+					restartOnTraceLoad = 0;
+					fprintf(stdout, CYAN "\t set" RESET " restartOnTraceLoad = false\n");
+				}
+			}
 		}
 		else fprintf(stderr, RED "\t ERROR: " RESET " 'set' needs a option name and a values as argument.\n\t See 'help' for description.\n");
 	}
@@ -1281,7 +1292,7 @@ int main (int argc, char *argv[]){
     nGrps = dm_nrows(GBgetDMInfo(model));
     if (GBhasGuardsInfo(model)){
         nGuards = GBgetStateLabelGroupInfo(model, GB_SL_ALL)->count;
-        fprintf(stdout,CYAN "INFO: " RESET " Number of guards %d.", nGuards);
+        fprintf(stdout,CYAN "INFO: " RESET " Number of guards %d.\n", nGuards);
     }
         
   	fprintf(stdout,CYAN "INFO: " RESET " State vector length is %d; there are %d groups\n", N, nGrps);
@@ -1314,8 +1325,8 @@ int main (int argc, char *argv[]){
 		extension = strrchr (files[1], '.');
 
 		if (!(extension == NULL)){ 
-			if (strcmp(extension,".gcf") == 0){
-    			loadTraceGCF(files[1]);
+			if (strcmp(extension,".gcf") == 0 || strcmp(extension,".pinssim") == 0){
+    			loadTrace(files[1]);
     		}
     	}
     }

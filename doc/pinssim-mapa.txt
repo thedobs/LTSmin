@@ -11,14 +11,9 @@ pinssim-mapa - Simulator for manual state exploration to  e.g. analyze the proce
 
 == SYNOPSIS
 
-*pinssim-mapa* <model> ['trace.gcf/trace.pinssim']
+*pinssim-mapa* [OPTION]... <model> ['trace.gcf/trace.pinssim']
 
-== DESCRIPTION
+include::inc/pinssim-description.txt[]
 
-{manname}
-
-include::inc/pinssim.txt[]
-
-== OPTIONS
-
-Lorom ipsum
+== SEE ALSO
+manpage:mapa2lts-sym[1],

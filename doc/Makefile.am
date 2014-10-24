@@ -113,6 +113,7 @@ extra_ASCIIDOC += inc/pins2lts-seq.txt
 extra_ASCIIDOC += inc/pins2lts-sym-options.txt
 extra_ASCIIDOC += inc/pins2lts-sym.txt
 extra_ASCIIDOC += inc/pins2torx.txt
+extra_ASCIIDOC += inc/pinssim-description.txt
 extra_ASCIIDOC += inc/plugin-options.txt
 extra_ASCIIDOC += inc/prom.txt
 extra_ASCIIDOC += inc/reachability-options.txt

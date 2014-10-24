@@ -58,7 +58,9 @@ pinssim_SOURCES   = pinssim.c
 pinssim_SOURCES  += ../pins-lib/dlopen-pins.c ../pins-lib/dlopen-pins.h
 pinssim_LDADD     = $(PINS_LIBS) $(VSET_LIBS)
 pinssim_CPPFLAGS  = -DPINS_DLL $(SYM_CPP_FLAGS)
-pinssim_LDFLAGS   = $(SYM_LD_FLAGS)
+if !BUILD_OS_IS_DARWIN
+pinssim_LDFLAGS   = -Wl,-E $(SYM_LD_FLAGS)
+endif
 nodist_EXTRA_pinssim_SOURCES = automake-force-linker.cxx # req. by vset
 
 # pinssim-lpo
@@ -100,8 +102,8 @@ pinssim_dve_SOURCES   = pinssim.c
 pinssim_dve_SOURCES  += ../pins-lib/dve-pins.c ../pins-lib/dve-pins.h
 pinssim_dve_LDADD     = $(PINS_LIBS)
 pinssim_dve_LDADD    += $(VSET_LIBS) $(DVE_LIBS)
-pinssim_dve_CPPFLAGS  = -DDIVINE $(DIVINE_CPPFLAGS) $(SYM_CPPFLAGS)
-pinssim_dve_LDFLAGS   = $(DIVINE_LDFLAGS) $(SYM_LDFLAGS)
+pinssim_dve_CPPFLAGS  = -DDIVINE $(DIVINE_CPPFLAGS) $(SYM_CPP_FLAGS)
+pinssim_dve_LDFLAGS   = $(DIVINE_LDFLAGS) $(SYM_LD_FLAGS)
 nodist_EXTRA_pinssim_dve_SOURCES = automake-force-linker.cxx # req. by vset
 
 # pinssim-prom
@@ -109,6 +111,6 @@ pinssim_prom_SOURCES  = pinssim.c
 pinssim_prom_SOURCES += ../pins-lib/prom-pins.c ../pins-lib/prom-pins.h
 pinssim_prom_LDADD    = $(PINS_LIBS)
 pinssim_prom_LDADD   += $(VSET_LIBS) $(SPINS_LIBS)
-pinssim_prom_CPPFLAGS = -DSPINS $(SPINS_CPPFLAGS) $(SYM_CPPFLAGS)
-pinssim_prom_LDFLAGS  = $(SPINS_LDFLAGS) $(SYM_LDFLAGS)
+pinssim_prom_CPPFLAGS = -DSPINS $(SPINS_CPPFLAGS) $(SYM_CPP_FLAGS)
+pinssim_prom_LDFLAGS  = $(SPINS_LDFLAGS) $(SYM_LD_FLAGS)
 nodist_EXTRA_pinssim_prom_SOURCES = automake-force-linker.cxx # req. by vset
