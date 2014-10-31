@@ -6,7 +6,7 @@
  *		Copyright    Formal Methods & Tools
  *				     EEMCS faculty - University of Twente - 2014
  *		Supervisor 	 Jeroen Meijer
- *		Description  
+ *		Description  Simulator for LTSmin model checker
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -15,8 +15,6 @@
  *	 Includes & Definitions
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-//#include "pinssim.h"
 
 // Includes from pins2lts-sym.c
 // TODO:
@@ -116,35 +114,7 @@
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // poptOption structure for HREaddOptions()
-// to be adapted!
 static  struct poptOption options[] = {
-//	{ NULL, 0 , POPT_ARG_CALLBACK|POPT_CBFLAG_POST|POPT_CBFLAG_SKIPOPTION , (void*)reach_popt , 0 , NULL , NULL },
-// #ifdef HAVE_SYLVAN
-//     { "order" , 0 , POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT , &order , 0 , "set the exploration strategy to a specific order" , "<bfs-prev|bfs|chain-prev|chain|par-prev|par>" },
-// #else
-//     { "order" , 0 , POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT , &order , 0 , "set the exploration strategy to a specific order" , "<bfs-prev|bfs|chain-prev|chain>" },
-// #endif
-//     { "saturation" , 0, POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT , &saturation , 0 , "select the saturation strategy" , "<none|sat-like|sat-loop|sat-fix|sat>" },
-//     { "sat-granularity" , 0 , POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &sat_granularity , 0 , "set saturation granularity","<number>" },
-//     { "save-sat-levels", 0, POPT_ARG_VAL, &save_sat_levels, 1, "save previous states seen at saturation levels", NULL },
-//     { "guidance", 0 , POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT , &guidance, 0 , "select the guided search strategy" , "<unguided|directed>" },
-//     { "deadlock" , 'd' , POPT_ARG_VAL , &dlk_detect , 1 , "detect deadlocks" , NULL },
-//     { "action" , 0 , POPT_ARG_STRING , &act_detect , 0 , "detect action prefix" , "<action prefix>" },
-//     { "invariant", 'i', POPT_ARG_STRING, &inv_detect, 1, "detect invariant violations", NULL },
-//     { "no-exit", 'n', POPT_ARG_VAL, &no_exit, 1, "no exit on error, just count (for error counters use -v)", NULL },
-//     { "trace" , 0 , POPT_ARG_STRING , &trc_output , 0 , "file to write trace to" , "<lts-file>.gcf" },
-//     { "save-transitions", 0 , POPT_ARG_STRING, &transitions_save_filename, 0, "file to write transition relations to", "<outputfile>" },
-//     { "load-transitions", 0 , POPT_ARG_STRING, &transitions_load_filename, 0, "file to read transition relations from", "<inputfile>" },
-//     { "mu" , 0 , POPT_ARG_STRING , &mu_formula , 0 , "file with a mu formula" , "<mu-file>.mu" },
-//     { "ctl-star" , 0 , POPT_ARG_STRING , &ctl_formula , 0 , "file with a ctl* formula" , "<ctl-file>.ctl" },
-//     { "dot", 0, POPT_ARG_STRING, &dot_dir, 0, "directory to write dot representation of vector sets to", NULL },
-//     { "pg-solve" , 0 , POPT_ARG_NONE , &pgsolve_flag, 0, "Solve the generated parity game (only for symbolic tool).","" },
-//     { NULL, 0 , POPT_ARG_INCLUDE_TABLE, spg_solve_options , 0, "Symbolic parity game solver options", NULL},
-// #if defined(LTSMIN_PBES)
-//     { "pg-reduce" , 0 , POPT_ARG_NONE , &pgreduce_flag, 0, "Reduce the generated parity game on-the-fly (only for symbolic tool).","" },
-// #endif
-//     { "pg-write" , 0 , POPT_ARG_STRING , &pg_output, 0, "file to write symbolic parity game to","<pg-file>.spg" },
-//     { "no-matrix" , 0 , POPT_ARG_VAL , &no_matrix , 1 , "do not print the dependency matrix when -v (verbose) is used" , NULL},
    	SPEC_POPT_OPTIONS,
   	{ NULL, 0 , POPT_ARG_INCLUDE_TABLE, greybox_options , 0 , "PINS options",NULL},
     { NULL, 0 , POPT_ARG_INCLUDE_TABLE, vset_options , 0 , "Vector set options",NULL},
@@ -231,28 +201,6 @@ static char * helpText[32] =
 	"      restartOnTraceLoad         true/false - default: true",
 	" EXIT",
 	"  quit / q                       quit PINSsim"};
-
-
-//From lts.h
-// static int arg_all=0;
-// static int arg_table=0;
-// static char *arg_value="name";
-// static enum { FF_TXT, FF_CSV } file_format = FF_TXT;
-// static char *arg_sep=",";
-// static enum { IDX, NAME } output_value = NAME;
-
-// static si_map_entry output_values[] = {
-//     {"name",    NAME},
-//     {"idx",     IDX},
-//     {NULL, 0}
-// };
-
-// static si_map_entry file_formats[] = {
-//     {"txt",     FF_TXT},
-//     {"csv",     FF_CSV},
-//     {NULL, 0}
-// };
-//END IMPORT lts.h ////////////////////////////////////////////
 
 /* * SECTION * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
@@ -722,6 +670,8 @@ replayTransitionsByStates(int ** states, int amountOf, bool printOut){
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*removeExtension()
+  removes current file extension from file (including '.') and stores the result in 'minusExt'*/
 void
 removeExtension(char * file, char * minusExt, int index){
 	for(int i = 0; i < index; i++){
@@ -729,6 +679,9 @@ removeExtension(char * file, char * minusExt, int index){
 	}
 }
 
+/*loadPINSimFile()
+  loads and chunks data from a csv/pinssim 'file' into int * values
+  returns an int that stores the number of values*/
 int
 loadPINSsimFile(char * file, int * values){
 	FILE * read;
@@ -763,10 +716,8 @@ loadPINSsimFile(char * file, int * values){
 	int n = 0;
 	if(nSemi > 0) values = (int*)realloc(values,nSemi*sizeof(int));
 	if(strstr(buffer,";")){
-		fprintf(stderr, "Contains ;!\n");
 		char * split = strtok(buffer,";");
 		sscanf(split,"%d",&values[n]);
-		fprintf(stderr, "%d %s\n", n, split);
 		while (split!=NULL){
 			split = strtok(NULL,";");
 			if(split!=NULL){
@@ -784,38 +735,8 @@ loadPINSsimFile(char * file, int * values){
 	return (nSemi);
 }
 
-// /*trc_get_type_str() from lts-tracepp.c
-//   TODO: Add description	*/
-// static void
-// trace_get_type_str(lts_t trace, int typeno, int type_idx, size_t dst_size, char* dst) {
-//     if (typeno==-1) Abort("illegal type");
-//     // if ( output_value == IDX ) {
-//     //     snprintf(dst, dst_size, "%d", type_idx);
-//     //     return;
-//     // }
-//     switch(lts_type_get_format(trace->ltstype,typeno)){
-//         case LTStypeDirect:
-//         case LTStypeRange:
-//             snprintf(dst, dst_size, "%d", type_idx);
-//             break;
-//         case LTStypeChunk:
-//         case LTStypeEnum:
-//             {
-//             chunk c=VTgetChunk(trace->values[typeno],type_idx);
-//             chunk2string(c,dst_size,dst);
-//             }
-//             break;
-//     }
-// }
-
-// /*trc_get_edge_label() from lts-tracepp.c
-//   TODO: Add description	*/
-// static void
-// trc_get_edge_label (lts_t trace, int i, int * dst){
-//     if (trace->edge_idx) TreeUnfold(trace->edge_idx, trace->label[i], dst);
-//     else dst[0]=trace->label[i];
-// }
-
+/*saveTracePINSsim()
+  saves current trace in .pinssim file format to 'file'*/
 bool
 saveTracePINSsim(char * file){
 	FILE * save = fopen(file,"w");
@@ -852,6 +773,10 @@ saveTracePINSsim(char * file){
 	}
 }
 
+/*saveTrace()
+  stores current trace in 'file' to be later loaded and replayed again.
+  Checks on and ensures valid file extension before saving.
+  For now supported: .pinssim Default: .pinssim*/
 void
 saveTrace(char * file){
 
@@ -877,12 +802,15 @@ saveTrace(char * file){
 	}
 }
 
-
+/*loadTracePINSsim() 
+  loads a trace previously stored by PINSsim in a .pinssim file with the help of loadPINSsimFile()
+  and checks whether parameters of stored trace match the parameters of the current model.
+  Resets the current to the initial state depending on the bool restartOnTraceLoad*/
 bool
 loadTracePINSsim(char * file){
 	
 	int n;
-	int * values = (int*)malloc(sizeof(int));
+	int * values = (int*)calloc((N+4),sizeof(int));
 	char * extension = "";
 	extension = strrchr (file, '.');
 
@@ -893,16 +821,12 @@ loadTracePINSsim(char * file){
 	} 
 	else if (strcmp(extension,".pinssim") == 0){
 		n = loadPINSsimFile(file,values);
-		fprintf(stdout, "Number of values read from %s: %d\n", file, n);
 		fprintf(stdout, CYAN "\t INFO: " RESET " Loaded data from file: %s \n\n",file);
 	} else{
 		fprintf(stderr, RED "\t ERROR:" RESET " File extension %s unknown. Please load a .pinssim file.\n", extension);
 		free(values);
 		return false;
 	}
-
-	for (int i = 0; i < n; ++i) fprintf(stderr, "%d %d,", i, values[i]);
-	fprintf(stdout, "\n");
 	
 	if (n >= 4){
 		if (values[0] != N ||
@@ -914,7 +838,6 @@ loadTracePINSsim(char * file){
 			return false;
 		} else{
 			trace_nTrans = values[3];
-			fprintf(stderr, "%d\n",trace_nTrans);
 			trace_trans = (int*)malloc(trace_nTrans*sizeof(int));
 			for (int i = 0; i < trace_nTrans; ++i){
 				trace_trans[i] = values[4+i];
@@ -935,8 +858,9 @@ loadTracePINSsim(char * file){
 }
 
 /*loadTraceGCF()
-  load lts_t trace from file and extracts a int ** array of the states in the trace from it
-  FOR NOW! -> FUTURE: extraction of transition group?*/
+  loads lts_t trace from file and extracts a int ** array of the states in the trace from it. 
+  Checks whether parameters of loaded trace match parameters of current model.
+  Resets the current to the initial state depending on the bool restartOnTraceLoad*/
 bool
 loadTraceGCF(char * file){
 	opf = stdout;
@@ -963,7 +887,6 @@ loadTraceGCF(char * file){
 	} else{
 		fprintf(stdout, CYAN "\t INFO:" RESET " Parameteres of trace match model.\n");
 		trace_states = (int**)malloc(trace->transitions*sizeof(int*));
-		//char tmp[BUFLEN];
 		for(uint32_t x=0; x<=trace->transitions; ++x) {
             	uint32_t i = (x != trace->transitions ? x : trace->dest[x-1]);
             	trace_states[i] = (int*)malloc(N*sizeof(int));
@@ -972,38 +895,6 @@ loadTraceGCF(char * file){
             		TreeUnfold(trace->state_db, i, temp);
             		array2PtrArray(temp,N,trace_states[i]);
             	}
-          //   	if (trace->label != NULL) {
-		        //     int edge_lbls[eLbls];
-		        //     trc_get_edge_label(trace, i, edge_lbls);
-		        //     //replayTransitions(edge_lbls,eLbls,1);
-		        //     for(int j=1; j<eLbls; ++j) {
-		        //         if ((i+1)<trace->states) {
-		        //             int typeno = lts_type_get_edge_label_typeno(trace->ltstype, j);
-		        //             trace_get_type_str(trace, typeno, edge_lbls[j], BUFLEN, tmp);
-		        //             fprintf(opf, "%s%s\n", arg_sep, tmp);
-		        //             fprintf(opf, "edge_lbls[%d]: %d\n", j, edge_lbls[j]);
-		        //             chunk c = chunk_str(tmp);
-    						// int act_index = GBchunkPut(model, typeno, c);
-    						// if (GBhasGuardsInfo(model)){
-	    					// 	int labels[189];
-	    					// 	for (int k = 0; k < 189; k++)
-	        	// 					labels[k] = edge_lbls[j] == k ? act_index : -1;
-	    					// 	int transNum = -1;
-	    					// 	int i = 0;
-	    					// 	while (i < nGrps){
-	    					// 		if (GBtransitionInGroup(model, labels, i)){
-	    					// 			transNum = i;
-	    					// 			break;
-	    					// 		}
-	    					// 		i++;
-	    					// 	}
-	    					// 	fprintf(opf, "Group Transition number: %d\n", transNum);
-	    					// }
-		        //         } else {
-		        //             //fprintf(opf, "%s", arg_sep);
-		        //         }
-		        //     }
-		        // }
        	}
        	// TODO: Remove reset of explored nodes to INITIAL maybe for future use
        	if (restartOnTraceLoad && !isSameState(current->state,head->state)) restart(true);
@@ -1011,6 +902,8 @@ loadTraceGCF(char * file){
     }
 }
 
+/*loadTrace()
+  loads and replays a trace from 'file' path if the located file has a .gcf or .pinssim extension*/
 void
 loadTrace(char * file){
 	char * extension = "";
