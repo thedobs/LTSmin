@@ -53,73 +53,73 @@ EXIT
 === PINSsim workflow
 *Started PINSsim, model was loaded and initial state was fetched sucessfully:*
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
-INITIAL state:
---- NODE -----------------------
--> This is the INITIAL state!
-State of this node:
-              initial state vector
-Transitions available from here:
-group     1 - sucessor state 1 vector
-group     2 - sucessor state 2 vector
-group     3 - sucessor state 3 vector
+ INITIAL state: 
+ ------NODE
+ -> This is the INITIAL state!
+ State of this node:
+               initial state vector
+ Transitions available from here:
+ group     1 - sucessor state 1 vector
+ group     2 - sucessor state 2 vector
+ group     3 - sucessor state 3 vector
+ 
+ Tree depth: 0
+ ------END NODE
 
-Tree depth: 0
-END NODE -------------------
-
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
 *Navigation in between states:*
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
-Enter command below - 'help' for options - 'quit' to quit:
-go 2
+ Enter command below - 'help' for options - 'quit' to quit:
+ go 2
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
-Taking transition 126 - exploring potential successor states.
+ Taking transition 126 - exploring potential successor states.
 
---- NODE -----------------------
-State of parent node:
-              inital state vector
-State of this node:
-              successor state 2 vector
- No transitions available from here!
- INFO: Enter 'goback' or '..' to go back to the parent state.parent
- Transition that lead here: 2 Tree depth: 1
---- END NODE -------------------
+ ------NODE 
+ State of parent node:
+               inital state vector
+ State of this node:
+               successor state 2 vector
+  No transitions available from here!
+  INFO: Enter 'goback' or '..' to go back to the parent state.parent
+  Transition that lead here: 2 Tree depth: 1
+ ------END NODE 
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
-Enter command below - 'help' for options - 'quit' to quit:
-goback
+ Enter command below - 'help' for options - 'quit' to quit:
+ goback
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
-Going back to parent state.
+ Going back to parent state.
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
 *A tree representation of all explored notes would look like following in PINSsim:*
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
-Enter command below - 'help' for options - 'quit' to quit:
-tree
+ Enter command below - 'help' for options - 'quit' to quit:
+ tree
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
- {backslash}INITAL 
-  | 1 
-  | 2  
-  {backslash} 3 
+   \ INITAL 
    | 1 
-   | 5  
-   {backslash} 7  
+   | 2  
+    \ 3 
+    | 1 
+    | 5  
+     \ 7  
 
-\-----------------------------------------------------------------------------------------------
+- ----------------------------------------------------------------------------------------------
 
 == OPTIONS
 
@@ -136,7 +136,7 @@ tree
 
 == PINSSIM FILE FORMAT
 
-The .pinssim file format is for now a simple comma separated file with the following structure:
+The .pinssim file format is for now a simple comma separated value file with the following structure:
 
 (length of state vector);(number of edgle labels);(number of state labels);(number of transitions in trace: n);(transition group 1);(transition group 2);...;(transition group n);
 

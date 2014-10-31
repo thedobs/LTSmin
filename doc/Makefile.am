@@ -75,11 +75,7 @@ MANPAGES += pbes2lts-mc.1
 
 MANPAGES += spgsolver.1
 
-MANPAGES += pinssim-lps.1
-MANPAGES += pinssim-mapa.1
-MANPAGES += pinssim-pbes.1
-MANPAGES += pinssim-dve.1
-MANPAGES += pinssim-prom.1
+MANPAGES += pinssim.1
 
 doc_ASCIIDOC = $(addsuffix .txt, $(basename $(MANPAGES)))
 
@@ -113,6 +109,7 @@ extra_ASCIIDOC += inc/pins2lts-seq.txt
 extra_ASCIIDOC += inc/pins2lts-sym-options.txt
 extra_ASCIIDOC += inc/pins2lts-sym.txt
 extra_ASCIIDOC += inc/pins2torx.txt
+extra_ASCIIDOC += inc/pinssim.txt
 extra_ASCIIDOC += inc/pinssim-description.txt
 extra_ASCIIDOC += inc/plugin-options.txt
 extra_ASCIIDOC += inc/prom.txt
